@@ -1,8 +1,11 @@
 # 🔍💀 Immortal WhatsABI
 
 Links to interface:
+
 https://immortal-whatsabi.on-fleek.app/
-https://ipfs.io/ipfs/bafybeifn7aomjwfxxexlos3rxhd6rk73ggg2vx5tophunkwno4ytklakoa/
+
+IPFS Link:
+https://ipfs.io/ipfs/QmZf7RfzoVu44kYUxvE4RedsWyMevCuPZRYZjfTMVQnR7T
 
 A decentralized UI for [WhatsABI](https://github.com/shazow/whatsabi) that lives forever on IPFS. This tool helps you inspect and understand any smart contract by generating its ABI through bytecode analysis.
 
