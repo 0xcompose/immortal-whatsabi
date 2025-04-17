@@ -1,38 +1,88 @@
-# sv
+# 🔍💀 Immortal WhatsABI
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Links to interface:
+https://immortal-whatsabi.on-fleek.app/
+https://ipfs.io/ipfs/bafybeifn7aomjwfxxexlos3rxhd6rk73ggg2vx5tophunkwno4ytklakoa/
 
-## Creating a project
+A decentralized UI for [WhatsABI](https://github.com/shazow/whatsabi) that lives forever on IPFS. This tool helps you inspect and understand any smart contract by generating its ABI through bytecode analysis.
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Features
 
-```bash
-# create a new project in the current directory
-npx sv create
+- 🔍 Inspect any smart contract across multiple EVM chains
+- 🤖 Auto-generates ABI from contract bytecode
+- 🌐 Runs completely client-side
+- ♾️ Hosted on IPFS - can't be taken down
+- 🎯 Simple, focused interface
+- 📱 Responsive design for all devices
 
-# create a new project in my-app
-npx sv create my-app
-```
+## Tech Stack
 
-## Developing
+- [Svelte](https://svelte.dev) - Frontend framework
+- [Viem](https://viem.sh) - Ethereum interactions
+- [WhatsABI](https://github.com/shazow/whatsabi) - Contract ABI generation
+- [Fleek](https://fleek.xyz) - IPFS deployment
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Fork & Deploy Your Own
 
-```bash
-npm run dev
+1. Fork this repository
+2. Clone your fork:
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/immortal-whatsabi.git
+   cd immortal-whatsabi
+   ```
 
-## Building
+3. Install dependencies:
 
-To create a production version of your app:
+   ```bash
+   yarn install
+   ```
 
-```bash
-npm run build
-```
+4. Run locally:
 
-You can preview the production build with `npm run preview`.
+   ```bash
+   yarn dev
+   ```
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+5. Build for production:
+
+   ```bash
+   yarn build
+   ```
+
+6. Deploy to IPFS:
+   - Sign up on [Fleek](https://fleek.xyz)
+   - Connect your GitHub repository
+   - Configure the build settings:
+     - Framework: Svelte
+     - Build command: `yarn build`
+     - Publish directory: `build`
+   - Deploy!
+
+## Contribute
+
+Feel free to:
+
+- Fork and deploy your own version
+- Submit PRs to improve the UI
+- Add new features
+- Report issues
+- Suggest improvements
+
+## Why IPFS?
+
+By hosting on IPFS, we ensure that:
+
+- The tool remains accessible forever
+- No central point of failure
+- Anyone can fork and improve
+- Community-driven development
+- Censorship resistant
+
+## License
+
+MIT
+
+## Thanks
+
+Made with 💚 by [0xcompose](https://github.com/0xcompose)
