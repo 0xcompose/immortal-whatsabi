@@ -51,6 +51,7 @@
 	let selectedChain = allChains[0];
 	let showChainDropdown = false;
 	let isLoading = false;
+	let proxyNotice = '';
 
 	$: filteredChains = chainSearch
 		? allChains.filter((chain) => chain.name.toLowerCase().includes(chainSearch.toLowerCase()))
@@ -93,15 +94,25 @@
 			});
 
 			// Check if address is a contract
-			const bytecode = await client.getBytecode({ address: address as `0x${string}` });
+			const bytecode = await client.getCode({ address: address as `0x${string}` });
 			if (!bytecode) {
 				fetchError = 'This address is not a contract';
 				isLoading = false;
 				return;
 			}
 
-			const result = await whatsabi.autoload(address, { provider: client });
-			abi = result.abi;
+			const { abi: resolvedABI, address: resolvedAddress } = await whatsabi.autoload(address, {
+				provider: client,
+				followProxies: true
+			});
+			abi = resolvedABI;
+
+			if (resolvedAddress.toLowerCase() !== address.toLowerCase()) {
+				proxyNotice = `Note: This is a proxy contract. The actual implementation address is ${resolvedAddress}`;
+			} else {
+				proxyNotice = '';
+			}
+			console.log('Implementation Address', resolvedAddress);
 		} catch (error) {
 			console.error('Error fetching ABI:', error);
 			fetchError = error instanceof Error ? error.message : 'Failed to fetch ABI';
@@ -167,7 +178,7 @@
 				rel="noopener noreferrer"
 				class="tool-tag"
 			>
-				Source Code
+				GitHub
 			</a>
 			<a href="https://svelte.dev" target="_blank" rel="noopener noreferrer" class="tool-tag">
 				Svelte v4.2.12
@@ -223,6 +234,12 @@
 	{#if fetchError}
 		<div class="error-container">
 			<p class="error-message">{fetchError}</p>
+		</div>
+	{/if}
+
+	{#if proxyNotice}
+		<div class="info-container">
+			<p class="info-message">{proxyNotice}</p>
 		</div>
 	{/if}
 
@@ -653,5 +670,23 @@
 		.header-info {
 			margin-bottom: 1rem;
 		}
+	}
+
+	.info-container {
+		padding: 1rem 1.5rem;
+		background: #e8f5e9;
+		border: 1px solid #a5d6a7;
+		border-radius: 6px;
+		width: 100%;
+		max-width: 800px;
+		color: #2e7d32;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.info-message {
+		margin: 0;
+		font-size: 0.875rem;
 	}
 </style>
