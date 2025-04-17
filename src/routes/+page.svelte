@@ -170,7 +170,7 @@
 				WhatsABI v0.21.0
 			</a>
 			<a href="https://fleek.xyz" target="_blank" rel="noopener noreferrer" class="tool-tag">
-				Fleek
+				Fleek (IPFS)
 			</a>
 			<a
 				href="https://github.com/0xcompose/immortal-whatsabi"
