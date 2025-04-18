@@ -1,139 +1,166 @@
 <script lang="ts">
-	import { createPublicClient, http, isAddress } from 'viem';
-	import * as chains from 'viem/chains';
-	import { whatsabi } from '@shazow/whatsabi';
+	import { createPublicClient, http, isAddress } from 'viem'
+	import * as chains from 'viem/chains'
+	import { whatsabi } from '@shazow/whatsabi'
+
+	interface SelectedChain {
+		name: string
+		chain: chains.Chain
+	}
 
 	// Click outside action
 	function clickOutside(node: HTMLElement, handler: () => void) {
 		const handleClick = (event: MouseEvent) => {
 			if (!node.contains(event.target as Node)) {
-				handler();
+				handler()
 			}
-		};
+		}
 
-		document.addEventListener('click', handleClick, true);
+		document.addEventListener('click', handleClick, true)
 
 		return {
 			destroy() {
-				document.removeEventListener('click', handleClick, true);
+				document.removeEventListener('click', handleClick, true)
 			}
-		};
+		}
+	}
+
+	function splitWordsFromCamelCase(str: string) {
+		return str
+			.replace(/([A-Z])/g, ' $1') // Add spaces before capital letters
+			.trim()
+			.split(' ')
+			.map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
+			.join(' ')
 	}
 
 	// Convert chains object to array and filter out non-chain exports
-	const allChains = Object.entries(chains)
+	const allChains: SelectedChain[] = Object.entries(chains)
 		.filter(([_, value]) => value && typeof value === 'object' && 'id' in value)
 		.map(([key, chain]) => ({
-			name: key
-				.replace(/([A-Z])/g, ' $1') // Add spaces before capital letters
-				.trim()
-				.split(' ')
-				.map((word) => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
-				.join(' '),
+			name: splitWordsFromCamelCase(key),
 			chain
 		}))
-		.sort((a, b) => a.name.localeCompare(b.name));
+		.sort((a, b) => a.name.localeCompare(b.name))
 
 	const mainnetIndex = allChains.findIndex((chain) => {
 		if (chain.chain.id === 1) {
-			return chain;
+			return chain
 		}
-	});
+	})
 
-	allChains[mainnetIndex].name = 'Ethereum Mainnet';
+	allChains[mainnetIndex].name = 'Ethereum Mainnet'
 
-	let abi: any[] = [];
-	let address = '';
-	let chainSearch = '';
-	let copySuccess = false;
-	let addressError = '';
-	let fetchError = '';
-	let selectedChain = allChains[0];
-	let showChainDropdown = false;
-	let isLoading = false;
-	let proxyNotice = '';
+	let inputValue = ''
+	let inputError = ''
+
+	let chainSearch = ''
+	let selectedChain: SelectedChain | undefined
+	let showChainDropdown = false
+
+	let copySuccess = false
+	let resolvedABI: any[] = []
+
+	let notice = ''
+	let error = ''
+
+	let isLoading = false
+	let currentPhase = ''
 
 	$: filteredChains = chainSearch
 		? allChains.filter((chain) => chain.name.toLowerCase().includes(chainSearch.toLowerCase()))
-		: allChains;
+		: allChains
 
-	function selectChain(chain: (typeof allChains)[0]) {
-		selectedChain = chain;
-		chainSearch = chain.name;
-		showChainDropdown = false;
+	function selectChain(chain: SelectedChain) {
+		selectedChain = chain
+		chainSearch = chain.name
+		showChainDropdown = false
 	}
 
 	function closeDropdown() {
-		showChainDropdown = false;
+		showChainDropdown = false
 	}
 
-	function validateAddress() {
-		if (!address) {
-			addressError = 'Address is required';
-			return false;
+	async function validateAddress() {
+		if (!inputValue) {
+			inputError = 'Address is required'
+			return false
 		}
-		if (!isAddress(address)) {
-			addressError = 'Invalid Ethereum address';
-			return false;
+
+		if (inputValue.endsWith('.eth') || isAddress(inputValue)) {
+			inputError = ''
+			return true
 		}
-		addressError = '';
-		return true;
+
+		inputError = 'Invalid Ethereum address or ENS name'
+		return false
 	}
 
 	async function getABI() {
-		if (!validateAddress()) return;
+		isLoading = true
+		error = ''
+		notice = ''
+		resolvedABI = []
 
-		isLoading = true;
-		fetchError = '';
-		abi = [];
+		if (!selectedChain) {
+			error = 'No chain selected'
+			isLoading = false
+			return
+		}
 
 		try {
 			const client = createPublicClient({
 				chain: selectedChain.chain,
 				transport: http()
-			});
+			})
 
-			// Check if address is a contract
-			const bytecode = await client.getCode({ address: address as `0x${string}` });
-			if (!bytecode) {
-				fetchError = 'This address is not a contract';
-				isLoading = false;
-				return;
-			}
-
-			const { abi: resolvedABI, address: resolvedAddress } = await whatsabi.autoload(address, {
+			const {
+				abi,
+				address: resolvedAddress,
+				hasCode
+			} = await whatsabi.autoload(inputValue, {
 				provider: client,
-				followProxies: true
-			});
-			abi = resolvedABI;
+				followProxies: true,
+				onProgress: (phase) => {
+					currentPhase = splitWordsFromCamelCase(phase) + '...'
+				}
+			})
 
-			if (resolvedAddress.toLowerCase() !== address.toLowerCase()) {
-				proxyNotice = `Note: This is a proxy contract. The actual implementation address is ${resolvedAddress}`;
-			} else {
-				proxyNotice = '';
+			if (!hasCode) {
+				error = 'This address is not a contract'
+				isLoading = false
+				return
 			}
-			console.log('Implementation Address', resolvedAddress);
+
+			resolvedABI = abi
+
+			if (resolvedAddress.toLowerCase() !== inputValue.toLowerCase()) {
+				notice = `Note: This is a proxy contract. The actual implementation address is ${resolvedAddress}`
+			} else {
+				notice = ''
+			}
+			console.log('Implementation Address', resolvedAddress)
 		} catch (error) {
-			console.error('Error fetching ABI:', error);
-			fetchError = error instanceof Error ? error.message : 'Failed to fetch ABI';
+			console.error('Error fetching ABI:', error)
+			error = error instanceof Error ? error.message : 'Failed to fetch ABI'
 		} finally {
-			isLoading = false;
+			isLoading = false
 		}
 	}
 
 	async function copyABI() {
 		try {
-			await navigator.clipboard.writeText(JSON.stringify(abi, null, 2));
-			copySuccess = true;
-			setTimeout(() => (copySuccess = false), 2000);
+			await navigator.clipboard.writeText(JSON.stringify(resolvedABI, null, 2))
+			copySuccess = true
+			setTimeout(() => (copySuccess = false), 2000)
 		} catch (error) {
-			console.error('Error copying to clipboard:', error);
+			console.error('Error copying to clipboard:', error)
 		}
 	}
 
 	function handleInput() {
-		if (address) validateAddress();
-		else addressError = '';
+		if (inputValue) validateAddress()
+		else inputError = ''
 	}
 </script>
 
@@ -190,23 +217,36 @@
 			<div class="input-wrapper">
 				<input
 					type="text"
-					bind:value={address}
+					bind:value={inputValue}
 					on:input={handleInput}
-					placeholder="Enter contract address"
-					class:error={addressError}
+					placeholder="Enter contract address or ENS name"
+					class:error={inputError}
 				/>
-				{#if addressError}
-					<span class="error-message">{addressError}</span>
+				{#if inputError}
+					<span class="error-message">{inputError}</span>
 				{/if}
 			</div>
 			<div class="chain-search-wrapper" use:clickOutside={closeDropdown}>
-				<input
-					type="text"
-					bind:value={chainSearch}
-					on:focus={() => (showChainDropdown = true)}
-					placeholder="Search chain..."
-					class="chain-search"
-				/>
+				<div class="input-with-icon">
+					<input
+						type="text"
+						bind:value={chainSearch}
+						on:focus={() => (showChainDropdown = true)}
+						placeholder="Search chain..."
+						class="chain-search"
+					/>
+					<svg
+						class="search-icon"
+						viewBox="0 0 24 24"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							d="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3C5.91 3 3 5.91 3 9.5C3 13.09 5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L19 20.49L20.49 19L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z"
+							fill="currentColor"
+						/>
+					</svg>
+				</div>
 				{#if showChainDropdown && filteredChains.length > 0}
 					<div class="chain-dropdown">
 						{#each filteredChains as chain}
@@ -222,28 +262,31 @@
 				{/if}
 			</div>
 		</div>
-		<button on:click={getABI} disabled={isLoading}>
-			{#if isLoading}
-				Loading...
-			{:else}
-				Get ABI
-			{/if}
-		</button>
+		<button on:click={getABI} disabled={isLoading}> Get ABI </button>
 	</div>
 
-	{#if fetchError}
+	{#if isLoading}
+		<div class="loader-container">
+			<div class="loader">
+				<div class="loader-spinner"></div>
+				<span class="loader-text">{currentPhase || 'Loading...'}</span>
+			</div>
+		</div>
+	{/if}
+
+	{#if error}
 		<div class="error-container">
-			<p class="error-message">{fetchError}</p>
+			<p class="error-message">{error}</p>
 		</div>
 	{/if}
 
-	{#if proxyNotice}
+	{#if notice}
 		<div class="info-container">
-			<p class="info-message">{proxyNotice}</p>
+			<p class="info-message">{notice}</p>
 		</div>
 	{/if}
 
-	{#if abi.length > 0}
+	{#if resolvedABI.length > 0}
 		<div class="output-container">
 			<div class="output-header">
 				<h2>Contract ABI</h2>
@@ -251,7 +294,7 @@
 					{copySuccess ? 'Copied!' : 'Copy'}
 				</button>
 			</div>
-			<pre>{JSON.stringify(abi, null, 2)}</pre>
+			<pre>{JSON.stringify(resolvedABI, null, 2)}</pre>
 		</div>
 	{/if}
 
@@ -688,5 +731,64 @@
 	.info-message {
 		margin: 0;
 		font-size: 0.875rem;
+	}
+
+	.loader-container {
+		width: 100%;
+		max-width: 800px;
+		padding: 1.5rem;
+		background: white;
+		border: 1px solid #e0e0e0;
+		border-radius: 6px;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+	}
+
+	.loader {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	.loader-text {
+		font-size: 1rem;
+		color: #2e7d32;
+		text-align: center;
+	}
+
+	.loader-spinner {
+		width: 32px;
+		height: 32px;
+		border: 3px solid rgba(46, 125, 50, 0.1);
+		border-radius: 50%;
+		border-top-color: #2e7d32;
+		animation: spin 1s ease-in-out infinite;
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	.input-with-icon {
+		position: relative;
+		width: 100%;
+	}
+
+	.search-icon {
+		position: absolute;
+		right: 12px;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 20px;
+		height: 20px;
+		color: #2e7d32;
+		opacity: 0.5;
+		pointer-events: none;
+	}
+
+	.chain-search {
+		padding-right: 40px;
 	}
 </style>
