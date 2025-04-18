@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { createPublicClient, http, isAddress } from 'viem'
+	import { createPublicClient, getAddress, http, isAddress } from 'viem'
 	import * as chains from 'viem/chains'
 	import { whatsabi } from '@shazow/whatsabi'
+	import { getEnsAddress } from 'viem/ens'
 
 	interface SelectedChain {
 		name: string
