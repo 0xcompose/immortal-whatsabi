@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { createPublicClient, getAddress, http, isAddress } from 'viem'
+	import { createPublicClient, http, isAddress } from 'viem'
 	import * as chains from 'viem/chains'
 	import { whatsabi } from '@shazow/whatsabi'
-	import { getEnsAddress } from 'viem/ens'
 
 	interface SelectedChain {
 		name: string
@@ -141,9 +140,9 @@
 				notice = ''
 			}
 			console.log('Implementation Address', resolvedAddress)
-		} catch (error) {
-			console.error('Error fetching ABI:', error)
-			error = error instanceof Error ? error.message : 'Failed to fetch ABI'
+		} catch (err: any) {
+			console.error('Error fetching ABI:', err)
+			error = err instanceof Error ? err.message : 'Failed to fetch ABI'
 		} finally {
 			isLoading = false
 		}
@@ -275,7 +274,7 @@
 		</div>
 	{/if}
 
-	{#if error}
+	{#if error?.length > 0}
 		<div class="error-container">
 			<p class="error-message">{error}</p>
 		</div>
