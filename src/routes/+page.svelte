@@ -50,6 +50,9 @@
 	})
 
 	allChains[mainnetIndex].name = 'Ethereum Mainnet'
+	const temp = allChains[0]
+	allChains[0] = allChains[mainnetIndex]
+	allChains[mainnetIndex] = temp
 
 	let inputValue = ''
 	let inputError = ''
