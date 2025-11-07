@@ -215,12 +215,12 @@
 </script>
 
 <svelte:head>
-	<title>Immortal WhatsABI - Extract ABI from any EVM Contract</title>
+	<title>WhatsABI UI - Extract ABI from any EVM Contract</title>
 	<meta name="description" content="Extract contract ABIs from any EVM address using WhatsABI, Sourcify, and Etherscan. Works with verified and unverified contracts across all EVM chains." />
 </svelte:head>
 
 <section>
-	<h1>🔍💀 Immortal WhatsABI</h1>
+	<h1>🔍💀 WhatsABI UI</h1>
 	<div class="header-info">
 		<a
 			href="https://github.com/0xcompose"
@@ -248,7 +248,7 @@
 				WhatsABI v0.23.0
 			</a>
 			<a
-				href="https://github.com/0xcompose/immortal-whatsabi"
+				href="https://github.com/0xcompose/whatsabi-ui"
 				target="_blank"
 				rel="noopener noreferrer"
 				class="tool-tag"
@@ -256,7 +256,7 @@
 				GitHub
 			</a>
 			<a
-				href="https://0xcompose.github.io/immortal-whatsabi/"
+				href="https://0xcompose.github.io/whatsabi-ui/"
 				target="_blank"
 				rel="noopener noreferrer"
 				class="tool-tag"
