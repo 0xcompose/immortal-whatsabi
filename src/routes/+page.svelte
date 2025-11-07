@@ -247,9 +247,6 @@
 			>
 				WhatsABI v0.23.0
 			</a>
-			<a href="https://hosting.fleek.xyz" target="_blank" rel="noopener noreferrer" class="tool-tag">
-				Fleek (IPFS)
-			</a>
 			<a
 				href="https://github.com/0xcompose/immortal-whatsabi"
 				target="_blank"
@@ -257,6 +254,14 @@
 				class="tool-tag"
 			>
 				GitHub
+			</a>
+			<a
+				href="https://0xcompose.github.io/immortal-whatsabi/"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="tool-tag"
+			>
+				GitHub Pages
 			</a>
 			<a href="https://svelte.dev" target="_blank" rel="noopener noreferrer" class="tool-tag">
 				Svelte v5.43.4

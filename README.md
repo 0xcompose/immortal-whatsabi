@@ -1,29 +1,24 @@
 # 🔍💀 Immortal WhatsABI
 
-Links to interface:
+**Live App:** https://0xcompose.github.io/immortal-whatsabi/
 
-https://immortal-whatsabi.on-fleek.app/
+> **Deprecated IPFS Version:** The previous Fleek-hosted version (https://immortal-whatsabi.on-fleek.app/) is no longer maintained. Direct IPFS link: https://ipfs.io/ipfs/QmViqpdQxEK3apJJSqtNPkHWpNRdyf9SNafHBnZK1wb1U9
 
-IPFS Link:
-https://ipfs.io/ipfs/QmViqpdQxEK3apJJSqtNPkHWpNRdyf9SNafHBnZK1wb1U9
-
-A decentralized UI for [WhatsABI](https://github.com/shazow/whatsabi) that lives forever on IPFS. This tool helps you inspect and understand any smart contract by generating its ABI through bytecode analysis.
+A powerful UI for [WhatsABI](https://github.com/shazow/whatsabi). This tool helps you inspect and understand any smart contract by generating its ABI through bytecode analysis or via simple retrieval from known sources.
 
 ## Features
 
-- 🔍 Inspect any smart contract across multiple EVM chains
-- 🤖 Auto-generates ABI from contract bytecode
+- 🔍 Inspect any smart contract across multiple EVM chains (all 500+ chains supported by viem)
+- 🤖 Auto-generates ABI from contract bytecode using WhatsABI
+- 🔑 Optional Etherscan API key support for getting it from verified source
+- 📊 Contract metadata display (compiler version, optimization settings), if available
 - 🌐 Runs completely client-side
-- ♾️ Hosted on IPFS - can't be taken down
-- 🎯 Simple, focused interface
-- 📱 Responsive design for all devices
 
 ## Tech Stack
 
-- [Svelte](https://svelte.dev) - Frontend framework
 - [Viem](https://viem.sh) - Ethereum interactions
 - [WhatsABI](https://github.com/shazow/whatsabi) - Contract ABI generation
-- [Fleek](https://fleek.xyz) - IPFS deployment
+- [Svelte](https://svelte.dev) - Frontend framework
 
 ## Fork & Deploy Your Own
 
@@ -53,14 +48,19 @@ A decentralized UI for [WhatsABI](https://github.com/shazow/whatsabi) that lives
    yarn build
    ```
 
-6. Deploy to IPFS:
+6. Deploy to GitHub Pages:
+
+   - Enable GitHub Pages in your repository settings
+   - Go to **Settings** → **Pages**
+   - Under **Source**, select **GitHub Actions**
+   - Push to `main` branch and the workflow will automatically deploy
+   - Your site will be available at `https://YOUR_USERNAME.github.io/immortal-whatsabi/`
+
+   Alternatively, deploy to IPFS via Fleek (deprecated):
+
    - Sign up on [Fleek](https://fleek.xyz)
    - Connect your GitHub repository
-   - Configure the build settings:
-     - Framework: Svelte
-     - Build command: `yarn build`
-     - Publish directory: `build`
-   - Deploy!
+   - Configure build command: `yarn build` and publish directory: `build`
 
 ## Contribute
 
@@ -72,20 +72,12 @@ Feel free to:
 - Report issues
 - Suggest improvements
 
-## Why IPFS?
-
-By hosting on IPFS, we ensure that:
-
-- The tool remains accessible forever
-- No central point of failure
-- Anyone can fork and improve
-- Community-driven development
-- Censorship resistant
-
 ## License
 
 MIT
 
-## Thanks
+## Credits
+
+Thanks to shazow for developing such a powerful tool
 
 Made with 💚 by [0xcompose](https://github.com/0xcompose)
