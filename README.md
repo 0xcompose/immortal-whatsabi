@@ -1,6 +1,6 @@
 # 🔍💀 Immortal WhatsABI
 
-**Live App:** https://0xcompose.github.io/immortal-whatsabi/
+**Live App:** https://0xcompose.github.io/whatsabi-ui/
 
 > **Deprecated IPFS Version:** The previous Fleek-hosted version (https://immortal-whatsabi.on-fleek.app/) is no longer maintained. Direct IPFS link: https://ipfs.io/ipfs/QmViqpdQxEK3apJJSqtNPkHWpNRdyf9SNafHBnZK1wb1U9
 
