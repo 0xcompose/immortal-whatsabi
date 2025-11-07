@@ -233,14 +233,6 @@
 		</a>
 		<div class="tools">
 			<a
-				href="https://github.com/wagmi-dev/viem"
-				target="_blank"
-				rel="noopener noreferrer"
-				class="tool-tag"
-			>
-				Viem v2.38.6
-			</a>
-			<a
 				href="https://github.com/shazow/whatsabi"
 				target="_blank"
 				rel="noopener noreferrer"
@@ -249,23 +241,20 @@
 				WhatsABI v0.23.0
 			</a>
 			<a
+				href="https://github.com/wagmi-dev/viem"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="tool-tag"
+			>
+				Viem
+			</a>
+			<a
 				href="https://github.com/0xcompose/whatsabi-ui"
 				target="_blank"
 				rel="noopener noreferrer"
 				class="tool-tag"
 			>
 				GitHub
-			</a>
-			<a
-				href="https://0xcompose.github.io/whatsabi-ui/"
-				target="_blank"
-				rel="noopener noreferrer"
-				class="tool-tag"
-			>
-				GitHub Pages
-			</a>
-			<a href="https://svelte.dev" target="_blank" rel="noopener noreferrer" class="tool-tag">
-				Svelte v5.43.4
 			</a>
 		</div>
 	</div>
