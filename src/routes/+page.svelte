@@ -75,6 +75,7 @@
 	
 	let etherscanApiKey = ''
 	let apiKeySaved = false
+	let showApiKey = false
 
 	// Load API key from localStorage on mount
 	if (typeof window !== 'undefined') {
@@ -323,12 +324,56 @@
 		</div>
 		
 		<div class="api-key-row">
-			<input
-				id="etherscan-api-key"
-				type="text"
-				bind:value={etherscanApiKey}
-				placeholder="Etherscan API Key (optional - improves ABI detection)"
-			/>
+			<div class="api-key-input-container">
+				<input
+					id="etherscan-api-key"
+					type={showApiKey ? 'text' : 'password'}
+					bind:value={etherscanApiKey}
+					placeholder="Etherscan API Key (optional - improves ABI detection)"
+				/>
+				<button
+					type="button"
+					class="toggle-visibility"
+					on:click={() => (showApiKey = !showApiKey)}
+					aria-label={showApiKey ? 'Hide API key' : 'Show API key'}
+				>
+					{#if showApiKey}
+						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path
+								d="M12 5C5.63636 5 2 12 2 12C2 12 5.63636 19 12 19C18.3636 19 22 12 22 12C22 12 18.3636 5 12 5Z"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+							<path
+								d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg>
+					{:else}
+						<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path
+								d="M3 3L21 21M10.5 10.677A2 2 0 0 0 9.323 13.5M12 5C5.636 5 2 12 2 12C2 12 3.636 15.273 6.364 17.182M12 19C18.364 19 22 12 22 12C22 12 20.364 8.727 17.636 6.818"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+							<path
+								d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg>
+					{/if}
+				</button>
+			</div>
 			<button class="save-button" on:click={saveApiKey}>
 				{apiKeySaved ? '✓ Saved Locally' : 'Save Locally'}
 			</button>
@@ -565,8 +610,62 @@
 		width: 100%;
 	}
 
-	.api-key-row input {
+	.api-key-input-container {
+		position: relative;
 		flex: 1;
+		display: flex;
+		align-items: center;
+	}
+
+	.api-key-input-container input {
+		flex: 1;
+		padding-right: 2.5rem;
+	}
+
+	.toggle-visibility {
+		position: absolute;
+		right: 0.75rem;
+		background: transparent;
+		border: none;
+		padding: 0;
+		margin: 0;
+		width: 20px;
+		height: 20px;
+		min-width: 20px;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #666;
+		transition: color 0.2s ease;
+		outline: none;
+		box-shadow: none;
+	}
+
+	.toggle-visibility:hover {
+		color: #1b5e20;
+		transform: none !important;
+		background: transparent !important;
+		box-shadow: none !important;
+	}
+
+	.toggle-visibility:focus {
+		outline: 2px solid #1b5e20;
+		outline-offset: 2px;
+		border-radius: 4px;
+		background: transparent !important;
+		box-shadow: none !important;
+	}
+	
+	.toggle-visibility:active {
+		background: transparent !important;
+		box-shadow: none !important;
+	}
+
+	.toggle-visibility svg {
+		width: 20px;
+		height: 20px;
+		display: block;
 	}
 
 	.save-button {
@@ -860,7 +959,11 @@
 			gap: 0.5rem;
 		}
 
-		.api-key-row input {
+		.api-key-input-container {
+			width: 100%;
+		}
+
+		.api-key-input-container input {
 			width: 100%;
 		}
 
@@ -868,7 +971,7 @@
 			width: 100%;
 		}
 
-		button:not(.copy-button):not(.save-button) {
+		button:not(.copy-button):not(.save-button):not(.toggle-visibility) {
 			width: 100%;
 			min-width: unset;
 		}
