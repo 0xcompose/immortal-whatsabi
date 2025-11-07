@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { createPublicClient, http, isAddress } from 'viem'
 	import * as chains from 'viem/chains'
-	import { whatsabi } from '@shazow/whatsabi'
+	import { whatsabi, loaders } from '@shazow/whatsabi'
+
+	console.log('chains', chains.mainnet)
 
 	interface SelectedChain {
 		name: string
@@ -69,6 +71,27 @@
 
 	let isLoading = false
 	let currentPhase = ''
+	
+	let etherscanApiKey = ''
+	let apiKeySaved = false
+
+	// Load API key from localStorage on mount
+	if (typeof window !== 'undefined') {
+		const savedKey = localStorage.getItem('etherscanApiKey')
+		if (savedKey) {
+			etherscanApiKey = savedKey
+		}
+	}
+
+	function saveApiKey() {
+		if (etherscanApiKey.trim()) {
+			localStorage.setItem('etherscanApiKey', etherscanApiKey)
+		} else {
+			localStorage.removeItem('etherscanApiKey')
+		}
+		apiKeySaved = true
+		setTimeout(() => (apiKeySaved = false), 2000)
+	}
 
 	$: filteredChains = chainSearch
 		? allChains.filter((chain) => chain.name.toLowerCase().includes(chainSearch.toLowerCase()))
@@ -112,22 +135,41 @@
 		}
 
 		try {
+			console.log('selectedChain', selectedChain)
 			const client = createPublicClient({
 				chain: selectedChain.chain,
 				transport: http()
 			})
 
+			// Configure ABI loader with Etherscan API key if provided
+			const config: any = {
+				provider: client,
+				followProxies: true,
+				onProgress: (phase: string) => {
+					currentPhase = splitWordsFromCamelCase(phase) + '...'
+				}
+			}
+
+			// Add Etherscan loader if API key is provided
+			if (etherscanApiKey.trim()) {
+				try {
+					config.abiLoader = new loaders.MultiABILoader([
+						new loaders.SourcifyABILoader({ chainId: selectedChain.chain.id }),
+						new loaders.EtherscanV2ABILoader({
+							apiKey: etherscanApiKey,
+							chainId: selectedChain.chain.id
+						})
+					])
+				} catch (e) {
+					console.warn('Failed to initialize Etherscan loader:', e)
+				}
+			}
+
 			const {
 				abi,
 				address: resolvedAddress,
 				hasCode
-			} = await whatsabi.autoload(inputValue, {
-				provider: client,
-				followProxies: true,
-				onProgress: (phase) => {
-					currentPhase = splitWordsFromCamelCase(phase) + '...'
-				}
-			})
+			} = await whatsabi.autoload(inputValue, config)
 
 			if (!hasCode) {
 				error = 'This address is not a contract'
@@ -189,7 +231,7 @@
 				rel="noopener noreferrer"
 				class="tool-tag"
 			>
-				Viem v2.27.2
+				Viem v2.38.6
 			</a>
 			<a
 				href="https://github.com/shazow/whatsabi"
@@ -197,9 +239,9 @@
 				rel="noopener noreferrer"
 				class="tool-tag"
 			>
-				WhatsABI v0.21.0
+				WhatsABI v0.23.0
 			</a>
-			<a href="https://fleek.xyz" target="_blank" rel="noopener noreferrer" class="tool-tag">
+			<a href="https://hosting.fleek.xyz" target="_blank" rel="noopener noreferrer" class="tool-tag">
 				Fleek (IPFS)
 			</a>
 			<a
@@ -211,61 +253,75 @@
 				GitHub
 			</a>
 			<a href="https://svelte.dev" target="_blank" rel="noopener noreferrer" class="tool-tag">
-				Svelte v4.2.12
+				Svelte v5.43.4
 			</a>
 		</div>
 	</div>
 	<div class="input-container">
-		<div class="input-group">
-			<div class="input-wrapper">
-				<input
-					type="text"
-					bind:value={inputValue}
-					on:input={handleInput}
-					placeholder="Enter contract address or ENS name"
-					class:error={inputError}
-				/>
-				{#if inputError}
-					<span class="error-message">{inputError}</span>
-				{/if}
-			</div>
-			<div class="chain-search-wrapper" use:clickOutside={closeDropdown}>
-				<div class="input-with-icon">
+		<div class="main-input-row">
+			<div class="input-group">
+				<div class="input-wrapper">
 					<input
 						type="text"
-						bind:value={chainSearch}
-						on:focus={() => (showChainDropdown = true)}
-						placeholder="Search chain..."
-						class="chain-search"
+						bind:value={inputValue}
+						on:input={handleInput}
+						placeholder="Enter contract address or ENS name"
+						class:error={inputError}
 					/>
-					<svg
-						class="search-icon"
-						viewBox="0 0 24 24"
-						fill="none"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							d="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3C5.91 3 3 5.91 3 9.5C3 13.09 5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L19 20.49L20.49 19L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z"
-							fill="currentColor"
-						/>
-					</svg>
+					{#if inputError}
+						<span class="error-message">{inputError}</span>
+					{/if}
 				</div>
-				{#if showChainDropdown && filteredChains.length > 0}
-					<div class="chain-dropdown">
-						{#each filteredChains as chain}
-							<button
-								class="chain-option"
-								class:selected={chain === selectedChain}
-								on:click={() => selectChain(chain)}
-							>
-								{chain.name}
-							</button>
-						{/each}
+				<div class="chain-search-wrapper" use:clickOutside={closeDropdown}>
+					<div class="input-with-icon">
+						<input
+							type="text"
+							bind:value={chainSearch}
+							on:focus={() => (showChainDropdown = true)}
+							placeholder="Search chain..."
+							class="chain-search"
+						/>
+						<svg
+							class="search-icon"
+							viewBox="0 0 24 24"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								d="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3C5.91 3 3 5.91 3 9.5C3 13.09 5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L19 20.49L20.49 19L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z"
+								fill="currentColor"
+							/>
+						</svg>
 					</div>
-				{/if}
+					{#if showChainDropdown && filteredChains.length > 0}
+						<div class="chain-dropdown">
+							{#each filteredChains as chain}
+								<button
+									class="chain-option"
+									class:selected={chain === selectedChain}
+									on:click={() => selectChain(chain)}
+								>
+									{chain.name}
+								</button>
+							{/each}
+						</div>
+					{/if}
+				</div>
 			</div>
+			<button on:click={getABI} disabled={isLoading}> Get ABI </button>
 		</div>
-		<button on:click={getABI} disabled={isLoading}> Get ABI </button>
+		
+		<div class="api-key-row">
+			<input
+				id="etherscan-api-key"
+				type="text"
+				bind:value={etherscanApiKey}
+				placeholder="Etherscan API Key (optional - improves ABI detection)"
+			/>
+			<button class="save-button" on:click={saveApiKey}>
+				{apiKeySaved ? '✓ Saved' : 'Save'}
+			</button>
+		</div>
 	</div>
 
 	{#if isLoading}
@@ -377,9 +433,11 @@
 		}
 
 		.input-container {
-			flex-direction: row;
-			align-items: flex-start;
 			max-width: 800px;
+		}
+
+		.main-input-row {
+			flex-direction: row;
 		}
 
 		.input-group {
@@ -424,11 +482,17 @@
 
 	.input-container {
 		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		width: 100%;
+		max-width: 800px;
+	}
+
+	.main-input-row {
+		display: flex;
 		flex-direction: row;
 		gap: 1rem;
 		align-items: flex-start;
-		width: 100%;
-		max-width: 800px;
 	}
 
 	.input-group {
@@ -443,6 +507,42 @@
 		flex-direction: column;
 		gap: 0.25rem;
 		flex: 1;
+	}
+
+	.api-key-row {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+		width: 100%;
+	}
+
+	.api-key-row input {
+		flex: 1;
+	}
+
+	.save-button {
+		padding: 0.75rem 1.5rem;
+		border: none;
+		border-radius: 4px;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		white-space: nowrap;
+		min-width: fit-content;
+		background-color: #2e7d32;
+		color: white;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.save-button:hover:not(:disabled) {
+		background-color: #1b5e20;
+	}
+
+	.save-button:disabled {
+		background-color: #ccc;
+		cursor: not-allowed;
 	}
 
 	.chain-search-wrapper {
@@ -685,6 +785,10 @@
 
 	@media (max-width: 599px) {
 		.input-container {
+			width: 100%;
+		}
+
+		.main-input-row {
 			flex-direction: column;
 			width: 100%;
 		}
@@ -702,7 +806,20 @@
 			width: 100%;
 		}
 
-		button:not(.copy-button) {
+		.api-key-row {
+			flex-direction: column;
+			gap: 0.5rem;
+		}
+
+		.api-key-row input {
+			width: 100%;
+		}
+
+		.save-button {
+			width: 100%;
+		}
+
+		button:not(.copy-button):not(.save-button) {
 			width: 100%;
 			min-width: unset;
 		}
