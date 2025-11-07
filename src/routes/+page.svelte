@@ -330,7 +330,7 @@
 				placeholder="Etherscan API Key (optional - improves ABI detection)"
 			/>
 			<button class="save-button" on:click={saveApiKey}>
-				{apiKeySaved ? '✓ Saved' : 'Save'}
+				{apiKeySaved ? '✓ Saved Locally' : 'Save Locally'}
 			</button>
 		</div>
 	</div>
