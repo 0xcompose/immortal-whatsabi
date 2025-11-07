@@ -215,7 +215,8 @@
 </script>
 
 <svelte:head>
-	<title>Immortal WhatsABI</title>
+	<title>Immortal WhatsABI - Extract ABI from any EVM Contract</title>
+	<meta name="description" content="Extract contract ABIs from any EVM address using WhatsABI, Sourcify, and Etherscan. Works with verified and unverified contracts across all EVM chains." />
 </svelte:head>
 
 <section>
