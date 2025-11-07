@@ -65,6 +65,7 @@
 
 	let copySuccess = false
 	let resolvedABI: any[] = []
+	let contractResult: any = null
 
 	let notice = ''
 	let error = ''
@@ -127,6 +128,7 @@
 		error = ''
 		notice = ''
 		resolvedABI = []
+		contractResult = null
 
 		if (!selectedChain) {
 			error = 'No chain selected'
@@ -145,6 +147,7 @@
 			const config: any = {
 				provider: client,
 				followProxies: true,
+				loadContractResult: true,
 				onProgress: (phase: string) => {
 					currentPhase = splitWordsFromCamelCase(phase) + '...'
 				}
@@ -168,7 +171,8 @@
 			const {
 				abi,
 				address: resolvedAddress,
-				hasCode
+				hasCode,
+				contractResult: result
 			} = await whatsabi.autoload(inputValue, config)
 
 			if (!hasCode) {
@@ -178,6 +182,7 @@
 			}
 
 			resolvedABI = abi
+			contractResult = result
 
 			if (resolvedAddress.toLowerCase() !== inputValue.toLowerCase()) {
 				notice = `Note: This is a proxy contract. The actual implementation address is ${resolvedAddress}`
@@ -342,6 +347,44 @@
 	{#if notice}
 		<div class="info-container">
 			<p class="info-message">{notice}</p>
+		</div>
+	{/if}
+
+	{#if contractResult && contractResult.ok}
+		<div class="contract-info">
+			<h3>Contract Information</h3>
+			<div class="info-grid">
+				{#if contractResult.name}
+					<div class="info-item">
+						<span class="info-label">Name:</span>
+						<span class="info-value">{contractResult.name}</span>
+					</div>
+				{/if}
+				{#if contractResult.compilerVersion}
+					<div class="info-item">
+						<span class="info-label">Compiler:</span>
+						<span class="info-value">{contractResult.compilerVersion}</span>
+					</div>
+				{/if}
+				{#if contractResult.evmVersion}
+					<div class="info-item">
+						<span class="info-label">EVM Version:</span>
+						<span class="info-value">{contractResult.evmVersion}</span>
+					</div>
+				{/if}
+				{#if contractResult.runs !== undefined}
+					<div class="info-item">
+						<span class="info-label">Optimization Runs:</span>
+						<span class="info-value">{contractResult.runs}</span>
+					</div>
+				{/if}
+				{#if contractResult.loader?.name}
+					<div class="info-item">
+						<span class="info-label">Source:</span>
+						<span class="info-value">{contractResult.loader.name.replace('ABILoader', '')}</span>
+					</div>
+				{/if}
+			</div>
 		</div>
 	{/if}
 
@@ -851,6 +894,48 @@
 	.info-message {
 		margin: 0;
 		font-size: 0.875rem;
+	}
+
+	.contract-info {
+		width: 100%;
+		max-width: 800px;
+		background: #f5f5f5;
+		border: 1px solid #e0e0e0;
+		border-radius: 8px;
+		padding: 1.5rem;
+	}
+
+	.contract-info h3 {
+		margin: 0 0 1rem 0;
+		color: #1b5e20;
+		font-size: 1.125rem;
+		font-weight: 600;
+	}
+
+	.info-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 0.75rem;
+	}
+
+	.info-item {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.info-label {
+		font-size: 0.75rem;
+		color: #666;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+	.info-value {
+		font-size: 0.875rem;
+		color: #333;
+		font-family: 'Fira Mono', monospace;
 	}
 
 	.loader-container {
